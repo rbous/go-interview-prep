@@ -13,12 +13,15 @@ import "sync"
 func ProcessBatch(items []string, transformFn func(string) string) []string {
 	var wg sync.WaitGroup
 	var results []string
+	var mu sync.Mutex
 
 	for _, item := range items {
+		wg.Add(1)
 		go func(s string) {
-			wg.Add(1)
 			defer wg.Done()
 			result := transformFn(s)
+			mu.Lock()
+			defer mu.Unlock()
 			results = append(results, result)
 		}(item)
 	}
