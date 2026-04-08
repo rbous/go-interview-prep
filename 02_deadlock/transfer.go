@@ -27,13 +27,14 @@ func (a *Account) Balance() int {
 
 func Transfer(from, to *Account, amount int) {
 	from.mu.Lock()
-	defer from.mu.Unlock()
-
-	to.mu.Lock()
-	defer to.mu.Unlock()
 
 	if from.balance >= amount {
 		from.balance -= amount
+		from.mu.Unlock()
+		to.mu.Lock()
 		to.balance += amount
+		to.mu.Unlock()
+	} else {
+		from.mu.Unlock()
 	}
 }
