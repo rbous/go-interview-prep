@@ -14,11 +14,6 @@ import (
 //   - Verify the downloaded file's SHA-256 matches expectedHash (hex string).
 //   - Return an error if the server returns a non-2xx status code.
 //   - Clean up partial files on checksum failure.
-//
-// BUG(1): Does not resume partial downloads — always starts from scratch.
-// BUG(2): Does not check HTTP status code — silently writes error pages to disk.
-// BUG(3): File handle is not closed before computing checksum (may miss flushed data).
-// BUG(4): On checksum failure, the corrupt file is left on disk.
 
 func DownloadFile(url, destPath, expectedHash string) error {
 	resp, err := http.Get(url)

@@ -11,11 +11,6 @@ import (
 //   1. Stop accepting new jobs.
 //   2. Wait for all in-flight jobs to complete (with a deadline).
 //   3. Return the results of completed jobs.
-//
-// BUG(1): Shutdown doesn't wait for in-flight jobs to finish.
-// BUG(2): There's a race condition on the `results` slice.
-// BUG(3): New jobs can be submitted after Shutdown is called.
-// Fix all three bugs.
 
 type UpdateServer struct {
 	jobCh   chan Job

@@ -9,12 +9,6 @@ import (
 // WriteConfig writes config data to the given path atomically.
 // If the process crashes mid-write, readers should see either the
 // old content or the new content — never a partial/corrupt file.
-//
-// BUG: This writes directly to the target file. If the write is
-// interrupted, the file will be corrupt. Fix it using the standard
-// atomic write pattern: write to a temp file, then rename.
-//
-// BONUS BUG: File permissions are not preserved.
 
 func WriteConfig(path string, data []byte) error {
 	f, err := os.Create(path)
@@ -37,9 +31,6 @@ func ReadConfig(path string) ([]byte, error) {
 }
 
 // EnsureDir creates the directory for a given file path if it doesn't exist.
-//
-// BUG: The permission bits are too open for a config directory.
-// Config directories should be 0755, not 0777.
 func EnsureDir(path string) error {
 	dir := filepath.Dir(path)
 	return os.MkdirAll(dir, 0777)

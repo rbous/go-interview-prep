@@ -10,11 +10,6 @@ import (
 // It should respect context cancellation: if ctx is cancelled,
 // all in-flight downloads should stop promptly and the function
 // should return whatever results were collected so far.
-//
-// BUG(1): The download simulation doesn't check for context cancellation,
-//         so it keeps running even after ctx is cancelled.
-// BUG(2): Results are collected without synchronization.
-// Fix both bugs.
 
 type DownloadResult struct {
 	Name    string

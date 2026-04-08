@@ -13,12 +13,6 @@ import (
 //   Client sends: "STATUS <package_name>\n"
 //   Server sends: "<package_name>: <status>\n"
 //   Client sends: "QUIT\n" to disconnect.
-//
-// BUG(1): Accepted connections are never closed — resource leak when clients
-//         disconnect without sending QUIT.
-// BUG(2): The listener is not closed on Shutdown, so Accept blocks forever.
-// BUG(3): No connection timeout — a slow/idle client holds a goroutine forever.
-// BUG(4): connCount is modified without synchronization.
 
 type UpdateStatusServer struct {
 	statuses  map[string]string
@@ -92,7 +86,6 @@ func (s *UpdateStatusServer) handleConn(conn net.Conn) {
 
 // Shutdown stops the server.
 func (s *UpdateStatusServer) Shutdown() {
-	// BUG: doesn't close the listener or existing connections
 }
 
 // ConnCount returns the number of connections handled.

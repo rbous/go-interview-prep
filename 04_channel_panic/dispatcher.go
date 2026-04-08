@@ -4,10 +4,6 @@ import "sync"
 
 // Dispatch sends jobs to `numWorkers` workers and collects results.
 // Each worker applies `processFn` to its job and sends the result back.
-//
-// BUG: This code panics with "send on closed channel" under certain
-// conditions. Fix it so the results channel is closed safely and
-// all results are collected.
 
 func Dispatch(jobs []int, numWorkers int, processFn func(int) int) []int {
 	jobCh := make(chan int)
@@ -41,9 +37,6 @@ func Dispatch(jobs []int, numWorkers int, processFn func(int) int) []int {
 }
 
 // DispatchOrdered is like Dispatch but preserves input order.
-//
-// BUG: Same channel closing bug plus results may be out of order.
-// Fix both issues.
 
 type indexedResult struct {
 	index int
@@ -72,7 +65,6 @@ func DispatchOrdered(jobs []int, numWorkers int, processFn func(int) int) []int 
 		close(jobCh)
 	}()
 
-	// BUG: resultCh is never closed, this will block forever.
 	var results = make([]int, len(jobs))
 	for r := range resultCh {
 		results[r.index] = r.value

@@ -4,10 +4,6 @@ import "sync"
 
 // PackageRegistry tracks installed packages and their versions.
 // Multiple goroutines may read and write to it concurrently.
-//
-// BUG: Concurrent map read/write causes a panic at runtime.
-// Fix so all operations are safe for concurrent use.
-// You may use sync.Map, sync.RWMutex, or any other approach.
 
 type PackageRegistry struct {
 	packages map[string]string

@@ -8,10 +8,6 @@ import (
 
 // FetchAll takes a list of URLs and a fetch function, and returns results
 // from all successful fetches. It should launch one goroutine per URL.
-//
-// BUG: Goroutines leak when not all results are consumed. After FetchAll
-// returns, no goroutines from this call should still be blocked.
-// Fix the goroutine leak.
 
 func FetchAll(urls []string, fetchFn func(string) (string, error)) []string {
 	ch := make(chan string)

@@ -4,10 +4,6 @@ import "sync"
 
 // Account represents a bank account with a balance protected by a mutex.
 // Transfer should move `amount` from account `a` to account `b` atomically.
-//
-// BUG: When two goroutines call Transfer(a, b, 10) and Transfer(b, a, 5)
-// simultaneously, a deadlock can occur. Fix the locking strategy so
-// transfers never deadlock, while remaining safe for concurrent use.
 
 type Account struct {
 	mu      sync.Mutex
