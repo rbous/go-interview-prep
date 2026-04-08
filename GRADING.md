@@ -1,14 +1,22 @@
 # AI Grading Instructions
 
-You are grading a candidate's solutions to Go debugging exercises.
-The candidate was given buggy Go files and asked to fix them.
-**Test files (`_test.go`) should NOT be modified** — only the main `.go` files.
+You are grading a candidate's solutions to debugging exercises in Go and C.
+The candidate was given buggy source files and asked to fix them.
+**Test files (`_test.go`, `test_*.c`) should NOT be modified** — only the source files.
 
 ## General Grading Process
 
+### Go exercises (01-10, 15-18)
 1. For each exercise, read the candidate's modified `.go` file.
 2. Run `go test -race -v ./XX_exercise_name/` and record pass/fail.
 3. Run `go vet ./XX_exercise_name/` and check for warnings.
+4. Evaluate the solution against the rubric below.
+5. Assign a score per exercise (0-10) and provide brief feedback.
+
+### C exercises (11-14)
+1. For each exercise, read the candidate's modified `.c` file.
+2. Run `cd XX_dir && make test` and record pass/fail.
+3. Check for sanitizer warnings (ASAN for 11-13, TSAN for 14).
 4. Evaluate the solution against the rubric below.
 5. Assign a score per exercise (0-10) and provide brief feedback.
 
@@ -207,6 +215,174 @@ The candidate was given buggy Go files and asked to fix them.
 
 ---
 
+---
+
+### 11 — C Buffer Overflow (`11_c_buffer_overflow/version_parser.c`)
+
+**Bugs to fix:**
+- `strcpy` into fixed-size buffers without length checking — buffer overflow.
+- `compare_versions` doesn't handle NULL input — segfault.
+- `format_version` uses `sprintf` without checking `buf_size` — overflow.
+
+**Acceptable fixes:**
+- Use `strncpy` or `snprintf` with size limits.
+- Check string length before copying; return -1 if field exceeds `VERSION_FIELD_MAX`.
+- NULL checks at top of `compare_versions`.
+- Use `snprintf(buf, buf_size, ...)` and check return value against `buf_size`.
+
+**Deductions:**
+- -3 if ASAN still reports overflow.
+- -2 per function with missing NULL/bounds check.
+- -1 if uses `strncpy` without null-terminating.
+
+---
+
+### 12 — C Memory Leak (`12_c_memory_leak/manifest.c`)
+
+**Bugs to fix:**
+- Error path in `parse_manifest` doesn't free entries already added to the list.
+- `free_manifest` doesn't free `entry->package_name` and `entry->version`.
+- `find_entry` doesn't check for NULL manifest — segfault.
+
+**Acceptable fixes:**
+- On parse error, walk the linked list and free all entries + their strings before returning NULL.
+- Add `free(curr->package_name)` and `free(curr->version)` in `free_manifest`.
+- NULL check at top of `find_entry`.
+
+**Deductions:**
+- -4 if ASAN reports leaks.
+- -2 if error path still leaks.
+- -2 if `free_manifest` still leaks strings.
+- -1 if `find_entry` crashes on NULL.
+
+---
+
+### 13 — C Use-After-Free (`13_c_use_after_free/update_queue.c`)
+
+**Bugs to fix:**
+- `queue_drain_finished` accesses `curr->next` after `queue_remove` frees `curr`.
+- `queue_remove` dereferences `node->prev` and `node->next` without NULL checks (crashes on head/tail removal).
+- `queue_destroy` doesn't free `node->package_name` and `node->version`.
+
+**Acceptable fixes:**
+- Save `curr->next` before calling `queue_remove`.
+- In `queue_remove`, check if node is head (update `q->head`) and if node is tail (update `q->tail`).
+- Free string fields in `queue_destroy`.
+
+**Deductions:**
+- -4 if ASAN reports use-after-free.
+- -3 if head/tail removal crashes.
+- -2 if `queue_destroy` still leaks.
+- -1 if edge cases (single element, empty queue) aren't handled.
+
+---
+
+### 14 — C Pthread Race (`14_c_pthread_race/progress.c`)
+
+**Bugs to fix:**
+- `num_complete++` from multiple threads without synchronization.
+- `bytes_downloaded` read/written from different threads without locking.
+- Loop variable `i` captured by pointer — all threads may read the same index.
+- `args` array is stack-allocated in the loop and reused — threads read stale data.
+
+**Acceptable fixes:**
+- Use `pthread_mutex_t` or `__atomic` builtins for `num_complete`.
+- Mutex or atomics for `bytes_downloaded` (or accept per-entry access since each thread writes its own entry — explain this reasoning).
+- Heap-allocate a struct per thread containing `{tracker, index}`.
+
+**Deductions:**
+- -3 if TSAN reports races.
+- -3 if loop variable capture bug not fixed.
+- -2 if `args` array lifetime issue not fixed.
+- -1 if uses overly coarse locking (single mutex for all entries).
+
+---
+
+### 15 — HTTP Download (`15_http_download/client.go`)
+
+**Bugs to fix:**
+- No Range request for resume — always overwrites existing partial file.
+- No HTTP status code check — 4xx/5xx responses silently written to disk.
+- File not closed before computing checksum (data may not be flushed).
+- Corrupt file not removed on checksum failure.
+
+**Acceptable fixes:**
+- Check if `destPath` exists; if so, get its size and set `Range: bytes=N-` header.
+- Open file with `O_APPEND` or `O_WRONLY` at offset for resume.
+- Check `resp.StatusCode` is 200 or 206; error otherwise.
+- `f.Close()` before `fileHash()`.
+- `os.Remove(destPath)` on checksum mismatch.
+
+**Deductions:**
+- -3 if resume doesn't work.
+- -2 if bad HTTP status not caught.
+- -2 if corrupt file left on disk.
+- -1 if file not closed before hash.
+
+---
+
+### 16 — TCP Server (`16_tcp_server/server.go`)
+
+**Bugs to fix:**
+- Connections not closed when client disconnects (resource leak).
+- `Shutdown` doesn't close listener — `Accept` blocks forever.
+- No connection read deadline — slow clients hold goroutines.
+- `connCount` modified without synchronization.
+
+**Acceptable fixes:**
+- `defer conn.Close()` in `handleConn`.
+- `s.listener.Close()` in `Shutdown`.
+- `conn.SetDeadline()` or `conn.SetReadDeadline()` in `handleConn`.
+- Use `atomic.AddInt32` or mutex for `connCount`.
+
+**Deductions:**
+- -3 if `Shutdown` doesn't close listener.
+- -2 if connections leak.
+- -2 if `connCount` has data race.
+- -1 if no deadline on connections.
+
+---
+
+### 17 — Process Execution (`17_process_exec/runner.go`)
+
+**Bugs to fix:**
+- `RunCommand` doesn't enforce timeout — uses `cmd.Run()` without context.
+- Error return doesn't include stderr content.
+- `RunScript` ignores timeout parameter.
+- `RunWithRetry` doesn't check context cancellation between retries.
+
+**Acceptable fixes:**
+- Use `exec.CommandContext(ctx, ...)` with `context.WithTimeout`.
+- Wrap error: `fmt.Errorf("command failed: %s: %w", errBuf.String(), err)`.
+- `RunScript` should also use `CommandContext`.
+- Check `ctx.Err()` at the top of each retry iteration.
+
+**Deductions:**
+- -3 if timeout not enforced (timing test fails).
+- -2 if stderr not in error message.
+- -2 if `RunWithRetry` doesn't respect context.
+- -1 if `RunScript` timeout still ignored.
+
+---
+
+### 18 — File Locking (`18_file_locking/lock.go`)
+
+**Bugs to fix:**
+- `AcquireLock` uses blocking `LOCK_EX` — hangs if lock held.
+- `Release` doesn't remove the lock file.
+
+**Acceptable fixes:**
+- Add `LOCK_NB` flag: `syscall.LOCK_EX | syscall.LOCK_NB`.
+- `os.Remove(l.path)` in `Release` before or after closing.
+
+**Deductions:**
+- -4 if acquire still blocks.
+- -3 if lock file not cleaned up.
+- -1 if TOCTOU issue in `IsLocked` not documented (bonus if candidate adds a comment).
+- +1 bonus if candidate checks that the fd still refers to the same inode.
+
+---
+
 ## Final Report Format
 
 ```
@@ -230,8 +406,10 @@ The candidate was given buggy Go files and asked to fix them.
 
 ## Assessment Thresholds
 
-- **90-100**: Excellent — strong Go concurrency skills, ready for systems work.
-- **75-89**: Good — solid understanding with minor gaps.
-- **60-74**: Adequate — understands core concepts but needs more practice.
-- **40-59**: Below expectations — significant gaps in concurrency understanding.
-- **Below 40**: Not ready — fundamentals need work.
+Total is now out of 180 (18 exercises x 10 points). Normalize to percentage.
+
+- **90-100%**: Excellent — strong systems programming skills, ready for the role.
+- **75-89%**: Good — solid understanding with minor gaps.
+- **60-74%**: Adequate — understands core concepts but needs more practice.
+- **40-59%**: Below expectations — significant gaps.
+- **Below 40%**: Not ready — fundamentals need work.
