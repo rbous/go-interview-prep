@@ -8,23 +8,32 @@ import "sync"
 func Dispatch(jobs []int, numWorkers int, processFn func(int) int) []int {
 	jobCh := make(chan int)
 	resultCh := make(chan int)
+	var wg sync.WaitGroup
 
 	// Start workers
 	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			for job := range jobCh {
 				resultCh <- processFn(job)
 			}
-			close(resultCh)
 		}()
 	}
 
 	// Send jobs
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		for _, j := range jobs {
 			jobCh <- j
 		}
 		close(jobCh)
+	}()
+
+	go func() {
+		wg.Wait()
+		close(resultCh)
 	}()
 
 	// Collect results
@@ -63,6 +72,11 @@ func DispatchOrdered(jobs []int, numWorkers int, processFn func(int) int) []int 
 			jobCh <- indexedResult{index: i, value: j}
 		}
 		close(jobCh)
+	}()
+
+	go func() {
+		wg.Wait()
+		close(resultCh)
 	}()
 
 	var results = make([]int, len(jobs))
