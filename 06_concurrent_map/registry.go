@@ -7,6 +7,7 @@ import "sync"
 
 type PackageRegistry struct {
 	packages map[string]string
+	mu sync.RWMutex
 }
 
 func NewPackageRegistry() *PackageRegistry {
@@ -16,19 +17,31 @@ func NewPackageRegistry() *PackageRegistry {
 }
 
 func (r *PackageRegistry) Install(name, version string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	r.packages[name] = version
 }
 
 func (r *PackageRegistry) Get(name string) (string, bool) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	v, ok := r.packages[name]
 	return v, ok
 }
 
 func (r *PackageRegistry) List() map[string]string {
-	return r.packages
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	tmp := make(map[string]string, len(r.packages))
+	for k, v := range r.packages {
+		tmp[k] = v
+	}
+	return tmp
 }
 
 func (r *PackageRegistry) Remove(name string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	delete(r.packages, name)
 }
 
