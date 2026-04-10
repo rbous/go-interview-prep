@@ -8,8 +8,8 @@ Work top-to-bottom. Items higher up have the most impact on your interview.
 - [x] **01 Race Condition** — Go concurrency fundamentals (mutex/atomic, WaitGroup)
 - [x] **02 Deadlock** — Lock ordering, a classic concurrency interview question
 - [x] **05 WaitGroup Bug** — WaitGroup misuse is a very common Go gotcha
-- [ ] **04 Channel Panic** — Channel lifecycle (close once, WaitGroup+close pattern)
-- [ ] **10 Graceful Shutdown** — Directly relevant: update daemons need clean shutdown
+- [x] **04 Channel Panic** — Channel lifecycle (close once, WaitGroup+close pattern)
+- [x] **10 Graceful Shutdown** — Directly relevant: update daemons need clean shutdown
 - [ ] **14 C Pthread Race** — C concurrency: pthreads, mutexes, variable capture
 - [ ] **Design Q2: Atomic Updates & Rollback (A/B partitions)** — Core to OTA systems
 - [ ] **Design Q3: Secure Update Delivery** — Code signing is listed in the JD
