@@ -25,7 +25,7 @@ type MemoryStore struct {
 }
 
 func NewMemoryStore() *MemoryStore {
-	return &MemoryStore{}
+	return &MemoryStore{make(map[string]string)}
 }
 
 func (m *MemoryStore) Put(key, value string) {
@@ -43,12 +43,12 @@ func (m *MemoryStore) Delete(key string) {
 
 // LoggedStore wraps any Store and logs all operations.
 type LoggedStore struct {
-	inner *MemoryStore
+	inner Store
 	log   []string
 }
 
 // NewLoggedStore creates a LoggedStore wrapping the given store.
-func NewLoggedStore(s *MemoryStore) *LoggedStore {
+func NewLoggedStore(s Store) *LoggedStore {
 	return &LoggedStore{inner: s}
 }
 
@@ -64,6 +64,7 @@ func (l *LoggedStore) Get(key string) (string, bool) {
 
 func (l *LoggedStore) Delete(key string) {
 	l.log = append(l.log, fmt.Sprintf("DELETE %s", key))
+	l.inner.Delete(key)
 }
 
 func (l *LoggedStore) Log() []string {
@@ -75,7 +76,7 @@ func (l *LoggedStore) Log() []string {
 func GetOrDefault(s Store, key, defaultVal string) string {
 	val, ok := s.Get(key)
 	if !ok {
-		return val
+		return defaultVal
 	}
 	return val
 }
