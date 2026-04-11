@@ -1,6 +1,9 @@
 package polymorphism
 
-import "math"
+import (
+	"math"
+	"fmt"
+)
 
 // Shapes exercise — Polymorphism via interfaces.
 //
@@ -36,7 +39,7 @@ func Describe(s Shape) string {
 
 func formatFloat(f float64) string {
 	// Round to 2 decimal places for consistent output.
-	return math.Floor(f*100) / 100
+	return fmt.Sprintf("%.2f", math.Floor(f*100) / 100)
 }
 
 // --- Concrete types below. Fix them. ---
@@ -47,7 +50,7 @@ type Circle struct {
 }
 
 func (c Circle) Area() float64 {
-	return math.Pi * c.Radius
+	return math.Pi * c.Radius * c.Radius
 }
 
 func (c Circle) Name() string {
@@ -59,7 +62,7 @@ type Rectangle struct {
 	Width, Height float64
 }
 
-func (r Rectangle) area() float64 {
+func (r Rectangle) Area() float64 {
 	return r.Width * r.Height
 }
 
@@ -72,4 +75,10 @@ type Triangle struct {
 	Base, Height float64
 }
 
+func (t Triangle) Area() float64 {
+	return t.Base * t.Height / 2
+}
 
+func (t Triangle) Name() string {
+	return "Triangle"
+}
