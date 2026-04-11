@@ -10,13 +10,16 @@ import (
 // from all successful fetches. It should launch one goroutine per URL.
 
 func FetchAll(urls []string, fetchFn func(string) (string, error)) []string {
-	ch := make(chan string)
+	ch := make(chan string, len(urls))
+	errCh := make(chan struct{}, len(urls))
 
 	for _, url := range urls {
 		go func(u string) {
 			result, err := fetchFn(u)
 			if err == nil {
 				ch <- result
+			} else {
+				errCh <- struct{}{}
 			}
 		}(url)
 	}
@@ -27,6 +30,8 @@ func FetchAll(urls []string, fetchFn func(string) (string, error)) []string {
 		select {
 		case r := <-ch:
 			results = append(results, r)
+		case <-errCh:
+			continue
 		case <-timeout:
 			return results
 		}

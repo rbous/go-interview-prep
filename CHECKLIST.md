@@ -16,9 +16,9 @@ Work top-to-bottom. Items higher up have the most impact on your interview.
 
 ## Tier 2 — High Value (likely to come up)
 
-- [ ] **06 Concurrent Map** — Common Go runtime panic, maps + concurrency
-- [ ] **07 Context Cancellation** — Context is everywhere in Go systems code
-- [ ] **03 Goroutine Leak** — Buffered channels, preventing resource leaks
+- [x] **06 Concurrent Map** — Common Go runtime panic, maps + concurrency
+- [x] **07 Context Cancellation** — Context is everywhere in Go systems code
+- [x] **03 Goroutine Leak** — Buffered channels, preventing resource leaks
 - [ ] **13 C Use-After-Free** — Linked list bugs, pointer safety in C
 - [ ] **11 C Buffer Overflow** — String handling in C, bounds checking
 - [ ] **Design Q4: Updating MCUs via Linux Host** — CAN/SPI, the JD mentions peripherals
