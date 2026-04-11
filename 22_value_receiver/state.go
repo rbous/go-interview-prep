@@ -18,7 +18,7 @@ func NewUpdateState(initial string) *UpdateState {
 }
 
 // Apply records the current version in history and sets newVersion as active.
-func (s UpdateState) Apply(newVersion string) {
+func (s *UpdateState) Apply(newVersion string) {
     s.history = append(s.history, s.current)
     s.current = newVersion
 }
