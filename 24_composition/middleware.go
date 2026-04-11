@@ -50,7 +50,7 @@ func (a *AuthMiddleware) Handle(req Request) Response {
 	if req.Headers == nil || req.Headers["Authorization"] == "" {
 		return Response{Status: 401, Body: "unauthorized"}
 	}
-	return Response{Status: 200}
+	return a.Next.Handle(req)
 }
 
 // LogMiddleware records each request path it sees, then delegates.
@@ -81,10 +81,10 @@ func (u *UppercaseMiddleware) Handle(req Request) Response {
 //
 // The LogMiddleware instance is returned separately so tests can inspect its log entries.
 func BuildPipeline() (Handler, *LogMiddleware) {
-	echo := EchoHandler{}
+	echo := &EchoHandler{}
 	upper := &UppercaseMiddleware{Next: echo}
 	auth := &AuthMiddleware{Next: upper}
-	logger := &LogMiddleware{Next: echo}
+	logger := &LogMiddleware{Next: auth}
 
 	return logger, logger
 }
