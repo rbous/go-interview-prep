@@ -49,7 +49,10 @@ type PrefixNotifier struct {
 
 // NewPrefixNotifier returns a PrefixNotifier that prepends prefix to all messages.
 func NewPrefixNotifier(prefix string) *PrefixNotifier {
-    return &PrefixNotifier{}
+    return &PrefixNotifier{
+        PrefixFormatter: &PrefixFormatter{prefix},
+        MemorySender: &MemorySender{},
+    }
 }
 
 // Notify formats msg and delivers it via the embedded sender.
