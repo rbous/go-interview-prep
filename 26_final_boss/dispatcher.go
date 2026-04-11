@@ -63,7 +63,6 @@ func (l *TokenBucketLimiter) Wait(ctx context.Context) error {
 }
 
 func (l *TokenBucketLimiter) Stop() {
-	// BUG 1: Forgot to stop the ticker! This causes a permanent background leak.
 }
 
 // Dispatcher manages throttled execution of tasks.
@@ -102,7 +101,7 @@ func (d *Dispatcher) worker() {
 		}
 
 		d.results <- res
-		d.count++ // BUG 2: Data race on d.count (multiple workers writing)
+		d.count++
 	}
 }
 
@@ -120,8 +119,6 @@ func (d *Dispatcher) Results(count int) []Result {
 	final := make([]Result, count)
 	for i := 0; i < count; i++ {
 		res := <-d.results
-		// BUG 3: Ordering bug. Results are collected as they arrive, 
-		// but they aren't placed back in the original index.
 		final[i] = res
 	}
 	return final
@@ -130,11 +127,6 @@ func (d *Dispatcher) Results(count int) []Result {
 // Stop gracefully shuts down the dispatcher.
 func (d *Dispatcher) Stop() {
 	d.stopped = true
-	
-	// BUG 4: Deadlock risk. If we close the channel before workers are done,
-	// or wait in the wrong order, the system hangs.
 	d.wg.Wait()
 	close(d.tasks)
-	
-	// BUG 5: Forgot to stop the nested limiter.
 }
