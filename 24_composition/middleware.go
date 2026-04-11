@@ -7,11 +7,7 @@ import "strings"
 // You're building an HTTP-like middleware pipeline using interface composition
 // and the decorator pattern. Each middleware wraps a Handler and adds behavior.
 //
-// Bugs to fix:
-// - AuthMiddleware doesn't properly delegate to the next handler.
-// - LogMiddleware has incorrect composition (doesn't embed or wrap correctly).
-// - BuildPipeline chains the middlewares in the wrong order.
-// - Response field is never populated correctly in one middleware.
+// There are several bugs preventing the tests from passing. Find and fix them.
 //
 // Rules:
 // - Do NOT modify the test file.
@@ -54,7 +50,6 @@ func (a *AuthMiddleware) Handle(req Request) Response {
 	if req.Headers == nil || req.Headers["Authorization"] == "" {
 		return Response{Status: 401, Body: "unauthorized"}
 	}
-	// BUG: should delegate to a.Next, but returns an empty response instead
 	return Response{Status: 200}
 }
 
@@ -89,7 +84,7 @@ func BuildPipeline() (Handler, *LogMiddleware) {
 	echo := EchoHandler{}
 	upper := &UppercaseMiddleware{Next: echo}
 	auth := &AuthMiddleware{Next: upper}
-	logger := &LogMiddleware{Next: echo} // BUG: should wrap auth, not echo
+	logger := &LogMiddleware{Next: echo}
 
 	return logger, logger
 }

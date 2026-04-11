@@ -36,7 +36,7 @@ func Describe(s Shape) string {
 
 func formatFloat(f float64) string {
 	// Round to 2 decimal places for consistent output.
-	return math.Floor(f*100) / 100 // BUG: this returns float64, not string
+	return math.Floor(f*100) / 100
 }
 
 // --- Concrete types below. Fix them. ---
@@ -47,7 +47,7 @@ type Circle struct {
 }
 
 func (c Circle) Area() float64 {
-	return math.Pi * c.Radius // BUG: missing the square
+	return math.Pi * c.Radius
 }
 
 func (c Circle) Name() string {
@@ -59,7 +59,7 @@ type Rectangle struct {
 	Width, Height float64
 }
 
-func (r Rectangle) area() float64 { // BUG: unexported method name
+func (r Rectangle) area() float64 {
 	return r.Width * r.Height
 }
 
@@ -72,4 +72,4 @@ type Triangle struct {
 	Base, Height float64
 }
 
-// BUG: Triangle is missing its Area() and Name() methods entirely.
+
