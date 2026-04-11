@@ -19,8 +19,10 @@ func ProcessConcurrent(items []string, process func(string) string) []string {
         }(item)
     }
 
-    wg.Wait()
-    close(results)
+    go func(){
+        wg.Wait()
+        close(results)
+    }()
 
     var out []string
     for r := range results {
