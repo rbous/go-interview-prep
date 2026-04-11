@@ -44,6 +44,10 @@ go test -race ./...
 | 08 | Atomic File Write   | Systems        | Medium     |
 | 09 | Slice Gotcha        | General Go     | Easy       |
 | 10 | Graceful Shutdown   | Systems/Conc.  | Hard       |
+| 19 | Unordered Results   | Channels       | Easy       |
+| 20 | Pipeline Deadlock   | Channels       | Medium     |
+| 21 | Interface Composition| Interfaces    | Medium     |
+| 22 | Value Receiver      | Go Type System | Easy       |
 
 ## Tips
 
