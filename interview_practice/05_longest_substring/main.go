@@ -22,7 +22,7 @@ func lengthOfLongest(s string) int {
 	for right := 0; right < len(s); right++ {
 		ch := s[right]
 
-		if idx, ok := lastSeen[ch]; ok {
+		if idx, ok := lastSeen[ch]; ok && idx >= left{
 			left = idx + 1
 		}
 
