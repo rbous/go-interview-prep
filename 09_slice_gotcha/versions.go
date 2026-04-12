@@ -5,7 +5,7 @@ package slice_gotcha
 // must NOT be modified.
 
 func FilterVersions(versions []string, keep func(string) bool) []string {
-	result := versions[:0]
+	result := []string{}
 	for _, v := range versions {
 		if keep(v) {
 			result = append(result, v)
@@ -19,7 +19,7 @@ func FilterVersions(versions []string, keep func(string) bool) []string {
 
 func UniqueVersions(versions []string) []string {
 	seen := make(map[string]bool)
-	result := versions[:0]
+	result := []string{}
 	for _, v := range versions {
 		if !seen[v] {
 			seen[v] = true
