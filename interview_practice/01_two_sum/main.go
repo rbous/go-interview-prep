@@ -17,11 +17,11 @@ func twoSum(nums []int, target int) [2]int {
 	seen := make(map[int]int) // value -> index
 
 	for i, n := range nums {
-		seen[n] = i
 		complement := target - n
-		if j, ok := seen[complement]; ok && j != i {
+		if j, ok := seen[complement]; ok {
 			return [2]int{j, i}
 		}
+		seen[n] = i
 	}
 
 	return [2]int{-1, -1}
