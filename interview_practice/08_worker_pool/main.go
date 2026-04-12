@@ -26,7 +26,7 @@ func runPool(tasks []Task, workers int) []int {
     for i := 0; i < workers; i++ {
         go func() {
             for t := range jobs {
-                results[len(results)-1-t.ID] = t.Value * 2
+                results[t.ID] = t.Value * 2
                 wg.Done()
             }
         }()
