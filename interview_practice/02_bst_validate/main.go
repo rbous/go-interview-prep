@@ -23,16 +23,17 @@ type TreeNode struct {
 }
 
 func isValidBST(node *TreeNode) bool {
+	return isBST(node, math.MinInt, math.MaxInt)
+}
+
+func isBST(node *TreeNode, smallest, biggest int) bool {
 	if node == nil {
 		return true
 	}
-	if node.Left != nil && node.Left.Val >= node.Val {
+	if node.Val <= smallest || node.Val >= biggest {
 		return false
 	}
-	if node.Right != nil && node.Right.Val <= node.Val {
-		return false
-	}
-	return isValidBST(node.Left) && isValidBST(node.Right)
+	return isBST(node.Left, smallest, node.Val) && isBST(node.Right, node.Val, biggest)
 }
 
 func main() {
