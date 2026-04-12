@@ -18,7 +18,7 @@ type Collector struct {
     received []string
 }
 
-func (c Collector) OnEvent(event string) {
+func (c *Collector) OnEvent(event string) {
     c.received = append(c.received, event)
 }
 
@@ -39,7 +39,7 @@ func (b *Bus) Publish(event string) {
 func main() {
     bus := &Bus{}
     c := Collector{}
-    bus.Subscribe(c)
+    bus.Subscribe(&c)
     bus.Publish("order.created")
     bus.Publish("order.shipped")
     fmt.Println("received:", c.received)
