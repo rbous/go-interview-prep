@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+    "fmt"
+    "slices"
+)
 
 // Request Pipeline
 //
@@ -15,6 +18,7 @@ import "fmt"
 type Handler func(string)
 
 func Chain(h Handler, mws ...func(Handler) Handler) Handler {
+    slices.Reverse(mws)
     for _, mw := range mws {
         h = mw(h)
     }
